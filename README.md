@@ -307,6 +307,23 @@ See [DATABRICKS_FREE_EDITION_GUIDE.md](DATABRICKS_FREE_EDITION_GUIDE.md) for det
 
 ---
 
+## ⚠️ Important: Databricks Serverless Limitations
+
+If you're using **Databricks Serverless** compute tier (not Free Edition), note that these operations are **NOT supported**:
+
+- ❌ `.cache()` and `.persist()` operations
+- ❌ `.rdd` API access (including `.rdd.getNumPartitions()`)
+- ❌ Manual Spark configuration tuning
+
+**Why?** Serverless automatically optimizes data caching, partitioning, and resource allocation. These manual optimizations are not needed (and not available) on serverless.
+
+**Workshop Impact**: 
+- Part 3 (Caching section) - Skip or treat as conceptual learning
+- Part 3 (Partitioning checks) - Operations work, but partition counts not visible
+- All other content works normally on serverless!
+
+---
+
 ## 🤝 Contributing
 
 This workshop is open source! Contributions welcome:
