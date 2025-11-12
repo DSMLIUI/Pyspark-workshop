@@ -298,6 +298,7 @@ result = spark.sql("""
 
 ```python
 # Cache DataFrame
+# ⚠️ NOT supported on Databricks Serverless compute tier
 df.cache()
 df.persist()  # Same as cache
 df.unpersist()  # Remove from cache
@@ -306,6 +307,9 @@ df.unpersist()  # Remove from cache
 df.repartition(10)              # 10 partitions
 df.repartition(10, "col_name")  # Partition by column
 df.coalesce(1)                  # Reduce partitions (no shuffle)
+
+# Check partition count (⚠️ NOT supported on Databricks Serverless)
+# df.rdd.getNumPartitions()  # Will fail on serverless
 
 # Broadcast small tables
 from pyspark.sql.functions import broadcast
@@ -446,8 +450,8 @@ df1.unionByName(df2)  # Match by column name
 # Check execution plan
 df.explain()
 
-# Check partitions
-print(df.rdd.getNumPartitions())
+# Check partitions (⚠️ NOT supported on Databricks Serverless)
+# print(df.rdd.getNumPartitions())
 
 # Sample data for testing
 df.sample(0.1).show()  # 10% sample
@@ -466,11 +470,20 @@ df.select([count(when(col(c).isNull(), c)).alias(c) for c in df.columns]).show()
 1. **Transformations are lazy** - Nothing happens until an action
 2. **Actions trigger execution** - `.count()`, `.show()`, `.collect()`, `.write()`
 3. **Avoid `.collect()`** on large datasets - brings all data to driver
-4. **Use `.cache()`** for DataFrames used multiple times
+4. **Use `.cache()`** for DataFrames used multiple times (⚠️ NOT on Databricks Serverless)
 5. **Broadcast small tables** in joins to avoid shuffles
 6. **Parquet > CSV** for performance and schema preservation
 7. **Partition data** by frequently filtered columns
 8. **Use Delta Lake** for production pipelines (ACID, time travel)
+
+## ⚠️ Databricks Serverless Limitations
+
+**NOT Supported on Databricks Serverless Compute Tier:**
+- `.cache()` and `.persist()` operations
+- `.rdd` API access (including `.rdd.getNumPartitions()`)
+- Custom Spark configurations (serverless auto-manages)
+
+**Why?** Serverless automatically optimizes data caching, partitioning, and resource allocation. These manual optimizations are not needed (and not available) on serverless.
 
 ---
 
